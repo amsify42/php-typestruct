@@ -5,9 +5,9 @@ namespace Amsify42\Tests;
 use PHPUnit\Framework\TestCase;
 use Amsify42\TypeStruct\TypeStruct;
 
-final class SimpleTest extends TestCase
+final class PathTest extends TestCase
 {
-    private $tsClass = \Amsify42\Tests\TypeStruct\Simple::class;
+    private $tsPath  = TESTS_PATH.DS.'TypeStruct'.DS.'Simple.php';
     private $arrData = [
                         'id'    => 42,
                         'name'  => 'amsify',
@@ -18,7 +18,7 @@ final class SimpleTest extends TestCase
     public function testArray()
     {
         $typeStruct = new TypeStruct();
-        $typeStruct->setClass($this->tsClass);
+        $typeStruct->setPath($this->tsPath);
         $result = $typeStruct->validate($this->arrData);
 
         $this->assertArrayHasKey('is_validated', $result);
@@ -28,7 +28,7 @@ final class SimpleTest extends TestCase
     public function testObject()
     {
         $typeStruct = new TypeStruct();
-        $typeStruct->setClass($this->tsClass);
+        $typeStruct->setPath($this->tsPath);
         $result = $typeStruct->validate($this->getStdClass());
 
         $this->assertArrayHasKey('is_validated', $result);
@@ -37,7 +37,7 @@ final class SimpleTest extends TestCase
 
     public function testValidator()
     {
-        $sample = new \Amsify42\Tests\Validators\Sample();
+        $sample = new \Amsify42\Tests\Validators\Path();
         $result = $sample->validate();
         $this->assertArrayHasKey('is_validated', $result);
         $this->assertTrue($result['is_validated']);

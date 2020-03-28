@@ -7,31 +7,39 @@ use Amsify42\TypeStruct\Validation\Rules;
 
 class Validator extends Rules
 {
-    protected $typeStruct = NULL;
+    /**
+     * TypeStruct class full name
+     * @var null
+     */
+    protected $tsClass = NULL;
+    /**
+     * TypeStruct class full path
+     * @var null
+     */
+    protected $tsPath = NULL;
+    /**
+     * TypeStruct instance
+     * @var null
+     */
+    private $typeStruct = NULL;
 
-    protected $loadAsArray = false;
-
-    protected $data = NULL;
-
-    public function loadAsArray()
+    public function tsClass()
     {
-        return $this->loadAsArray;
+        return $this->tsClass;
     }
 
-    public function typeStruct()
+    public function tsPath()
     {
-        return $this->typeStruct;
-    }
-
-    public function data()
-    {
-        return $this->data;
+        return $this->tsPath;
     }
 
     public function validate()
     {
-        $typeStruct = new TypeStruct();
-        $typeStruct->setValidator($this);
-        return $typeStruct->validate();
+        if(!$this->typeStruct)
+        {
+            $this->typeStruct = new TypeStruct();
+            $this->typeStruct->setValidator($this);
+        }
+        return $this->typeStruct->validate();
     }
 }

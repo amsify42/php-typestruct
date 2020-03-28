@@ -4,9 +4,9 @@ namespace Amsify42\Tests\Validators;
 
 use Amsify42\TypeStruct\Validator;
 
-class Sample extends Validator
+class Path extends Validator
 {
-	protected $tsClass = \Amsify42\Tests\TypeStruct\Simple::class;
+	protected $tsPath = TESTS_PATH.DS.'TypeStruct'.DS.'Simple.php';
 
 	protected $data = [
                         'id'    => 42,

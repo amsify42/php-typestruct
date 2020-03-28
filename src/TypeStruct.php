@@ -3,6 +3,7 @@
 namespace Amsify42\TypeStruct;
 
 use Amsify42\TypeStruct\Validator;
+use Amsify42\TypeStruct\Validation\Rules;
 use stdClass;
 
 class TypeStruct
@@ -76,7 +77,7 @@ class TypeStruct
 	 * Validator
 	 * @var \Amsify42\TypeStruct\Validator
 	 */
-	private $validator = NULL;
+	private static $validator = NULL;
 	/**
 	 * Reserve type key
 	 * @var string
@@ -89,6 +90,10 @@ class TypeStruct
 	 */
 	function __construct($path='')
 	{
+		if(self::$validator instanceof Validator)
+		{
+			self::$validator = NULL;
+		}
 		if($path)
 		{
 			$this->setPath($path);
@@ -133,8 +138,14 @@ class TypeStruct
 	 */
 	public function setValidator(Validator $validator)
 	{
-		$this->validator = $validator;
-		$this->setClass($validator->typeStruct());
+		self::$validator = $validator;
+		if(self::$validator->tsClass())
+		{
+			$this->setClass();
+		} else if(self::$validator->tsPath())
+		{
+			$this->setPath();
+		}
 		return $this;
 	}
 
@@ -143,9 +154,9 @@ class TypeStruct
 	 * @param string
 	 * @return TypeStruct
 	 */
-	public function setPath($path)
+	public function setPath($path=NULL)
 	{
-		$this->path = $path;
+		$this->path = ($path)? $path: ((self::$validator && self::$validator instanceof Validator)? self::$validator->tsPath(): $path);
 		$this->process();
 		return $this;
 	}
@@ -155,8 +166,9 @@ class TypeStruct
 	 * @param string
 	 * @return TypeStruct
 	 */
-	public function setClass($class)
+	public function setClass($class=NULL)
 	{
+		$class = ($class)? $class: ((self::$validator && self::$validator instanceof Validator)? self::$validator->tsClass(): $class);
 		$this->path = $this->getFilePath($class);
 		$this->process();
 		return $this;
@@ -326,21 +338,45 @@ class TypeStruct
 	public function validate($data=null)
 	{
 		$encodeDecode = false;
-		if($this->validator)
+		/**
+		 * Get data from class if validator is of type Amsify42\TypeStruct\Validator
+		 */
+		if(self::$validator)
 		{
-			$data = $this->validator->data();
-			if($this->validator->loadAsArray())
+			if(self::$validator instanceof Validator)
 			{
-				$encodeDecode = true;
+				$data = self::$validator->data();
+				if(!self::$validator->isDataObject())
+				{
+					$encodeDecode = true;
+				}
 			}
 		}
 		if(!$encodeDecode && !$this->isDataObject)
 		{
 			$encodeDecode = true;
 		}
+		/**
+		 * Convert it to pure stdClass/Object if it is array
+		 */
 		if($encodeDecode)
 		{
-			$data = json_decode(json_encode($data));
+			$data = json_decode(json_encode($data));	
+		}
+		if(!self::$validator)
+		{
+			/**
+			 * Instantiating Rules class if not of type Validator
+			 */
+			self::$validator = new Rules();
+		}
+		if(self::$validator instanceof Rules)
+		{
+			/**
+			 * Assigning data to Rules
+			 * And making it accessible while performing validation rules
+			 */
+			self::$validator->setArraySimple($data);
 		}
 		$response = $this->iterateDictionary($data);
 		if($this->validateFull && sizeof($this->result['messages'])> 0)
@@ -470,7 +506,7 @@ class TypeStruct
 		$type 	= trim($type);
 		$matches= [];
 		preg_match('/\<(.*?)\>/ims', $type, $matches);
-		$custom = [];
+		$rules = [];
 		if(sizeof($matches)> 0)
 		{
 			if(isset($matches[1]))
@@ -478,7 +514,7 @@ class TypeStruct
 				$str = trim($matches[1]);
 				if($str)
 				{
-					$custom = explode('|', $matches[1]);
+					$rules = explode('|', $matches[1]);
 				}
 			}
 			$type = str_replace($matches[0], '', $type);
@@ -545,9 +581,9 @@ class TypeStruct
 		{
 			$result[self::TYPE_KEY]['__opt'] = true;
 		}
-		if(!empty($custom))
+		if(!empty($rules))
 		{
-			$result[self::TYPE_KEY]['custom'] = $custom;
+			$result[self::TYPE_KEY]['rules'] = $rules;
 		}
 		return $result;
 	}
@@ -790,7 +826,7 @@ class TypeStruct
 		}
 		if($result['is_validated'])
 		{
-			$result = $this->checkCustom($name, $info, $result, $value);
+			$result = $this->checkRules($name, $info, $result, $value);
 		}
 		return $result;
 	}
@@ -861,7 +897,7 @@ class TypeStruct
 			{
 				$result = $this->checkLength($name, $value, $info[self::TYPE_KEY], $info['length']);
 			}
-			$result = $this->checkCustom($name, $info, $result, $value);
+			$result = $this->checkRules($name, $info, $result, $value);
 		}
 
 		return $result;
@@ -878,28 +914,31 @@ class TypeStruct
 	}
 
 	/**
-	 * Check custom method in validator class
+	 * Check validation rule methods in validator class
 	 * @param  string $name
 	 * @param  array $info
 	 * @param  array $result
 	 * @param  mixed $value
 	 * @return array
 	 */
-	private function checkCustom($name, $info, $result, $value)
+	private function checkRules($name, $info, $result, $value)
 	{
-		if(isset($info['custom']) && $result['is_validated'] && $this->validator)
+		if(isset($info['rules']) && $result['is_validated'])
 		{
-			foreach($info['custom'] as $ck => $method)
+			if(sizeof($info['rules'])> 0)
 			{
-				if(method_exists($this->validator, $method) && is_callable([$this->validator, $method]))
+				foreach($info['rules'] as $ck => $method)
 				{
-					$this->validator->validation()->assignValue($value);
-					$cResult = call_user_func_array([$this->validator, $method], []);
-					if($cResult !== true)
+					if(method_exists(self::$validator, $method) && is_callable([self::$validator, $method]))
 					{
-						$result['is_validated'] = false;
-						$result['message'] = is_string($cResult)? $name.': '.$cResult:  $name.': Input not valid';
-						break;
+						self::$validator->setValue($value);
+						$cResult = call_user_func_array([self::$validator, $method], []);
+						if($cResult !== true)
+						{
+							$result['is_validated'] = false;
+							$result['message'] 		= is_string($cResult)? $cResult: 'Invalid value';
+							break;
+						}
 					}
 				}
 			}

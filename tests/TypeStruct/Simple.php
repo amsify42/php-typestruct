@@ -4,6 +4,7 @@ namespace Amsify42\Tests\TypeStruct;
 
 export typestruct Simple {
 	id: int,
-	name: string,
+	name: string<checkName>,
+	email: string<email>,
 	price: float
 }

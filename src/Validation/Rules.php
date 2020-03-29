@@ -7,7 +7,17 @@ use Amsify42\PHPVarsData\Data\ArraySimple;
 class Rules
 {
     /**
-     * data
+     * Validate full
+     * @var boolean
+     */
+    private $validateFull = true;
+    /**
+     * Content Type of data
+     * @var string
+     */
+    protected $contentType = '';
+    /**
+     * data that needs to be validated
      * @var null
      */
     protected $data = NULL;
@@ -61,6 +71,16 @@ class Rules
     public function setValue($value)
     {
         $this->value = $value;
+    }
+
+    public function validateFull()
+    {
+        return $this->validateFull;
+    }
+
+    public function contentType()
+    {
+        return $this->contentType;
     }
 
     public function isDataObject()

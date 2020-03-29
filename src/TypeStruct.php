@@ -3,6 +3,7 @@
 namespace Amsify42\TypeStruct;
 
 use Amsify42\TypeStruct\Validator;
+use Amsify42\TypeStruct\Validation\Data;
 use Amsify42\TypeStruct\Validation\Rules;
 use stdClass;
 
@@ -38,6 +39,11 @@ class TypeStruct
 	 * @var boolean
 	 */
 	private $validateFull = true;
+	/**
+	 * Content Type of data
+	 * @var string
+	 */
+	private $contentType = '';
 	/**
 	 * $result
 	 * @var array
@@ -128,6 +134,16 @@ class TypeStruct
 	public function isDataObject($set=false)
 	{
 		$this->isDataObject = $set;
+		return $this;
+	}
+
+	/**
+	 * Set the data content type
+	 * @return string
+	 */
+	public function contentType($type='')
+	{
+		$this->contentType = $type;
 		return $this;
 	}
 
@@ -336,49 +352,65 @@ class TypeStruct
 	 * @return array
 	 */
 	public function validate($data=null)
-	{
-		$encodeDecode = false;
+	{		
 		/**
 		 * Get data from class if validator is of type Amsify42\TypeStruct\Validator
 		 */
-		if(self::$validator)
+		if(self::$validator && self::$validator instanceof Validator)
 		{
-			if(self::$validator instanceof Validator)
-			{
-				$data = self::$validator->data();
-				if(!self::$validator->isDataObject())
-				{
-					$encodeDecode = true;
-				}
-			}
-		}
-		if(!$encodeDecode && !$this->isDataObject)
-		{
-			$encodeDecode = true;
+			$this->validateFull = self::$validator->validateFull();
+			
+			$data = self::$validator->data();
 		}
 		/**
-		 * Convert it to pure stdClass/Object if it is array
+		 * Instantiating Amsify42\TypeStruct\Rules class if not of type Amsify42\TypeStruct\Validator
 		 */
-		if($encodeDecode)
+		else if(!self::$validator)
 		{
-			$data = json_decode(json_encode($data));	
-		}
-		if(!self::$validator)
-		{
-			/**
-			 * Instantiating Rules class if not of type Validator
-			 */
 			self::$validator = new Rules();
 		}
+
+		/**
+		 * Check if contentType is set in Validator class or in TypeStruct instance
+		 */
+		$contentType = (self::$validator->contentType())? self::$validator->contentType(): $this->contentType;
+		if($contentType)
+		{
+			if($contentType == 'json')
+			{
+				$data = Data::fromJson($data);
+			}
+			else if($contentType == 'xml')
+			{
+				$data = Data::fromXML($data);
+			}
+		}
+		else
+		{
+			/**
+			 * Convert it to pure stdClass/Object if it is array
+			 */
+			if((self::$validator instanceof Validator && !self::$validator->isDataObject()) || !$this->isDataObject)
+			{
+				$data = Data::fromArray($data);
+			}
+		}
+
 		if(self::$validator instanceof Rules)
 		{
 			/**
-			 * Assigning data to Rules
+			 * Assigning data to Rules array simple
 			 * And making it accessible while performing validation rules
 			 */
 			self::$validator->setArraySimple($data);
 		}
+		/**
+		 * Start iterating data for validation
+		 */
 		$response = $this->iterateDictionary($data);
+		/**
+		 * If validateFull is set to true will get all validation errors
+		 */
 		if($this->validateFull && sizeof($this->result['messages'])> 0)
 		{
 			$this->result['is_validated'] = false;

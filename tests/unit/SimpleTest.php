@@ -20,7 +20,6 @@ final class SimpleTest extends TestCase
         $typeStruct = new TypeStruct();
         $typeStruct->setClass($this->tsClass);
         $result = $typeStruct->validate($this->arrData);
-
         $this->assertArrayHasKey('is_validated', $result);
         $this->assertTrue($result['is_validated']);
     }
@@ -28,7 +27,7 @@ final class SimpleTest extends TestCase
     public function testObject()
     {
         $typeStruct = new TypeStruct();
-        $typeStruct->setClass($this->tsClass);
+        $typeStruct->isDataObject(true)->setClass($this->tsClass);
         $result = $typeStruct->validate($this->getStdClass());
 
         $this->assertArrayHasKey('is_validated', $result);

@@ -28,7 +28,7 @@ final class PathTest extends TestCase
     public function testObject()
     {
         $typeStruct = new TypeStruct();
-        $typeStruct->setPath($this->tsPath);
+        $typeStruct->isDataObject(true)->setPath($this->tsPath);
         $result = $typeStruct->validate($this->getStdClass());
 
         $this->assertArrayHasKey('is_validated', $result);

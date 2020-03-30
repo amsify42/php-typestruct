@@ -79,6 +79,9 @@ $typeStruct = get_typestruct(App\TypeStruct\Simple::class, 'class');
 $result = $typeStruct->validate($data);
 ```
 
+#### Autoloading
+Autoloading of the typestruct file will be done automatically if its name and path is based on *psr-4* standards else you need to use `setPath()` method with typestruct instance which expects direct path of the typestruct file.
+
 #### Options
 With Typestruct instance we can set these options before calling `validate()` method
 ```php
@@ -219,6 +222,7 @@ items: boolean[]
 ```
 We can also use the other external **TypeStruct** file as a element
 ```php
+namespace App\TypeStruct;
 export typestruct Category {
     id: int,
     name: string
@@ -226,7 +230,8 @@ export typestruct Category {
 ```
 Now we can use `Category` as type like this
 ```php
-use Category;
+namespace App\TypeStruct;
+use App\TypeStruct\Category;
 export typestruct Product {
     id: int,
     name: string,
@@ -237,7 +242,8 @@ export typestruct Product {
 ```
 or as array of this type
 ```php
-use Category;
+namespace App\TypeStruct;
+use App\TypeStruct\Category;
 export typestruct Product {
     id: int,
     name: string,
@@ -248,7 +254,7 @@ export typestruct Product {
 ```
 You can also attach more rules to the input like this
 ```php
-namespace App;
+namespace App\TypeStruct;
 export typestruct User {
     id: int,
     name: string,
@@ -257,7 +263,7 @@ export typestruct User {
 ```
 As you can see, we have added rule `email` to the email element which will check for valid email address. You can add more rules to the element separated by dot `.` like this
 ```php
-namespace App;
+namespace App\TypeStruct;
 export typestruct User {
     id: int,
     url: string<url.checkHost>

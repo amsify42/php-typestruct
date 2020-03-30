@@ -34,6 +34,14 @@ final class SimpleTest extends TestCase
         $this->assertTrue($result['is_validated']);   
     }
 
+    public function testHelper()
+    {
+        $result = get_typestruct($this->tsClass, 'class')->validate($this->arrData);
+
+        $this->assertArrayHasKey('is_validated', $result);
+        $this->assertTrue($result['is_validated']);   
+    }
+
     public function testValidator()
     {
         $sample = new \Amsify42\Tests\Validators\Sample();

@@ -13,6 +13,12 @@ final class ComplexTest extends TestCase
                         'title'   => 'amsify42',
                         'simples' => [
                             [
+                                'id'    => 40,
+                                'name'  => 'amsify',
+                                'email' => 'amsify@site.com',
+                                'price' => 4.0
+                            ],
+                            [
                                 'id'    => 41,
                                 'name'  => 'amsify1',
                                 'email' => 'amsify1@site.com',

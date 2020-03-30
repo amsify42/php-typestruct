@@ -16,7 +16,7 @@ $ composer require amsify42/php-typestruct
 
 
 ### 1. Introduction
-The purpose of this php package is to make validation easy and structure defined for validation shuold be readable. The data passed can be validated against the structure defined.
+The purpose of this php package is to make validation easy and the structure defined for validation should be readable. The data passed can be validated against the structure defined.
 
 ### 2. Validation
 Let's say we have data in array format.
@@ -37,7 +37,7 @@ export typestruct Simple {
     price: float
 }
 ```
-Notice that the structure we defined does not completely look like a PHP syntax but it will be parsed and working as a structure against data.
+Notice that the structure we defined does not completely look like a PHP syntax but it will work as a structure against data.
 ```php
 $data = [
     'id' => 42,
@@ -50,7 +50,7 @@ $result = $typeStruct->validate($data);
 ```
 Note we are creating new instance of `Amsify42\TypeStruct\TypeStruct`, passing the full class name of typestruct `App\TypeStruct\Simple` and pasing data to **validate()** method.
 <br/><br/>
-The validate method will return with the info whether the data passed is validated against the structure and it will return.
+The validate method will return with the info whether the data passed is validated against the structure and it will return
 ```txt
 array(2) {
   ["is_validated"]=>
@@ -61,6 +61,50 @@ array(2) {
 }
 ```
 The `is_validated` will have `true` or `false` based on whether data is validated or not and `messages` will have error messages in hierarchy based on elements which are not validated.
+#### Helper method
+We can also use helper method to get the `Amsify42\TypeStruct\TypeStruct` new instance.
+```php
+/**
+ * If we have direct of the typestruct file
+ */
+$typeStruct = get_typestruct('/path/to/Simple.php');
+$result = $typeStruct->validate($data);
+```
+
+```php
+/**
+ * For class, we need to pass full class name and 2nd param as 'class'
+ */
+$typeStruct = get_typestruct(App\TypeStruct\Simple::class, 'class');
+$result = $typeStruct->validate($data);
+```
+
+#### Options
+With Typestruct instance we can set these options before calling `validate()` method
+```php
+/**
+ * To tell the typestruct that data we are passing is of type object(stdClass)
+ * default is false
+ */
+$typeStruct->isDataObject(true);
+/**
+ * If true, it will validate and collect all error messages else it will get the first error and exit
+ * Default is true
+ */
+$typeStruct->validateFull(false);
+/**
+ * Default is empty string, you can either pass 'json' or 'xml' based on the type of data you are passing for validation.
+ */
+$typeStruct->contentType('json');
+/**
+ * Absolute path to the typestruct file
+ */
+$typeStruct->setPath('/path/to/Sample.php');
+/**
+ * Full class name of typestruct file
+ */
+$typeStruct->setClass(App\TypeStruct\Simple::class);
+```
 
 ### 3. Data
 The data you can pass for validation are
@@ -70,7 +114,7 @@ Object(stdClass)
 Json
 XML
 ```
-As we have already seen the example, lets see the examples for the rest
+As we have already seen the array example, lets see the examples for the rest
 #### Object(stdClass)
 ```php
 $data        = new \stdClass();
@@ -82,7 +126,7 @@ $typeStruct = new Amsify42\TypeStruct\TypeStruct();
 $typeStruct->isDataObject(true)->setClass(App\TypeStruct\Simple::class);
 $result = $typeStruct->validate($data);
 ```
-Note we are passing `true` to method `isDataObject()` to tell **TypeStruct** that the data we are passing is of type **Object(stdClass)**. 
+**Note:** We are passing `true` to method `isDataObject()` to tell **TypeStruct** that the data we are passing is of type **Object(stdClass)**. 
 
 #### Json
 ```php
@@ -173,14 +217,14 @@ items: string[]
 items: float[]
 items: boolean[]
 ```
-We can also use array of other **TypeStruct** file as a child elements
+We can also use the other external **TypeStruct** file as a element
 ```php
 export typestruct Category {
     id: int,
     name: string
 }
 ```
-Now we can use `Category` as type in the other typestruct file like this
+Now we can use `Category` as type like this
 ```php
 use Category;
 export typestruct Product {
@@ -191,7 +235,7 @@ export typestruct Product {
     category: Category
 }
 ```
-or as child elements type for array of type `Category`
+or as array of this type
 ```php
 use Category;
 export typestruct Product {
@@ -202,9 +246,32 @@ export typestruct Product {
     categories: Category[]
 }
 ```
+You can also attach more rules to the input like this
+```php
+namespace App;
+export typestruct User {
+    id: int,
+    name: string,
+    email: string<email>
+}
+```
+As you can see, we have added rule `email` to the email element which will check for valid email address. You can add more rules to the element separated by dot `.` like this
+```php
+namespace App;
+export typestruct User {
+    id: int,
+    url: string<url.checkHost>
+}
+```
+These are the pre defined rules you can use
+```txt
+email - Check for valid email
+url - Check if string is a valid url
+date - Check if string is a valid date
+```
 
 ### 6. Custom Rules
-We can also write method to perform cutom validation like but this can only be achieved when we create class and extends `Amsify42\TypeStruct\Validator`
+We can also write method to perform cutom validation but this can only be achieved when we create class and extends it to `Amsify42\TypeStruct\Validator`
 ```php
 namespace App\TypeStruct;
 
@@ -243,3 +310,25 @@ class Sample extends Validator
 }
 ```
 We can use `$this->value()` to get the active value of the element which is applicable to the rule. To get the other element value, we already have `$this->data` accessible from these custom rule methods.
+<br/>
+If you want to access data from custom method more easily, you can also use the method `$this->path()` which will directly get the element from multi level path.
+```php
+class Sample extends Validator
+{
+    ...
+    protected $data = [
+                        'id'    => 42,
+                        'detail' => [
+                            'more' => [
+                                'location' => 'City'
+                            ]
+                        ]
+                    ];
+
+    public function checkCustom()
+    {
+        echo $this->path('detail.more.location'); /* It will print `City` */
+    }                                 
+} 
+```
+**Note:** `$this->path` expects parameters to be key name separated by dot(if multiple keys) and will either return `NULL`(if key does not exist) or the target key value.

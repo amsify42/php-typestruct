@@ -99,13 +99,28 @@ class Rules
 
 	public function email()
     {
-        if(filter_var($this->value, FILTER_VALIDATE_EMAIL))
-        {
-            return true;
-        }
-        else
+        if(Data::isValidEmail($this->value) === false)
         {
             return 'Invalid email';
         }
+        return true;
+    }
+
+    public function url()
+    {
+        if(Data::isValidURL($this->value) === false)
+        {
+            return 'Invalid url';
+        }
+        return true;
+    }
+
+    public function date()
+    {
+        if(Data::isValidDate($this->value) === false)
+        {
+            return 'Invalid date';
+        }
+        return true;
     }
 }

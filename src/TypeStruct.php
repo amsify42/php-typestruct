@@ -546,7 +546,7 @@ class TypeStruct
 				$str = trim($matches[1]);
 				if($str)
 				{
-					$rules = explode('|', $matches[1]);
+					$rules = explode('.', $matches[1]);
 				}
 			}
 			$type = str_replace($matches[0], '', $type);
@@ -790,7 +790,7 @@ class TypeStruct
 					{
 						foreach($value as $vk => $el)
 						{
-							if(!is_string($el))
+							if(!Data::isStr($el))
 							{
 								$result['child_err'] = true;
 								$result['is_validated'] = false;
@@ -803,7 +803,7 @@ class TypeStruct
 					{
 						foreach($value as $vk => $el)
 						{
-							if(!is_int($el))
+							if(!Data::isInt($el))
 							{
 								$result['child_err'] = true;
 								$result['is_validated'] = false;
@@ -816,7 +816,7 @@ class TypeStruct
 					{
 						foreach($value as $vk => $el)
 						{
-							if(!is_float($el))
+							if(!Data::isFloat($el))
 							{
 								$result['child_err'] = true;
 								$result['is_validated'] = false;
@@ -829,7 +829,7 @@ class TypeStruct
 					{
 						foreach($value as $vk => $el)
 						{
-							if(!is_bool($el))
+							if(!Data::isBool($el))
 							{
 								$result['child_err'] = true;
 								$result['is_validated'] = false;
@@ -873,11 +873,11 @@ class TypeStruct
 	private function checkType($name, $value, $info)
 	{
 		$result = ['is_validated' => true, 'message' => ''];
-		$value  = is_string($value)? trim($value): $value;
+		$value  = Data::isStr($value)? trim($value): $value;
 		switch($info[self::TYPE_KEY])
 		{
 			case 'string':
-				if(!is_string($value))
+				if(!Data::isStr($value))
 				{
 					$result['is_validated'] = false;
 					$result['message'] = $this->getMessage('string');
@@ -885,7 +885,7 @@ class TypeStruct
 				break;
 
 			case 'int':
-				if(!is_int($value))
+				if(!Data::isInt($value))
 				{
 					$result['is_validated'] = false;
 					$result['message'] = $this->getMessage('integer');
@@ -893,14 +893,14 @@ class TypeStruct
 				break;
 
 			case 'float':
-				if(!is_float($value))
+				if(!Data::isFloat($value))
 				{
 					$result['is_validated'] = false;
 					$result['message'] = $this->getMessage('float');
 				}
 				break;
 			case 'boolean':
-				if(!is_bool($value))
+				if(!Data::isBool($value))
 				{
 					$result['is_validated'] = false;
 					$result['message'] = $this->getMessage('boolean');
@@ -968,7 +968,7 @@ class TypeStruct
 						if($cResult !== true)
 						{
 							$result['is_validated'] = false;
-							$result['message'] 		= is_string($cResult)? $cResult: 'Invalid value';
+							$result['message'] 		= Data::isStr($cResult)? $cResult: 'Invalid value';
 							break;
 						}
 					}

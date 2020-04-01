@@ -89,6 +89,11 @@ class TypeStruct
 	 * @var string
 	 */
 	const TYPE_KEY = '__ty';
+	/**
+	 * Reserve Optional key
+	 * @var string
+	 */
+	const OPT_KEY = '__opt';
 
 	/**
 	 * Set typestruct class path while instantiating
@@ -312,21 +317,28 @@ class TypeStruct
 				$elementArray = explode(':', trim($element));
 				if(sizeof($elementArray)> 1)
 				{
-					if(trim($elementArray[1]) == '{}')
+					$segment = trim($elementArray[1]);
+					$isDict  = ($segment == '{}' || $segment == '?{}')? true: false;
+					$isOpt 	 = ($segment == '?{}')? true: false;
+					if($isDict)
 					{
 						$structure[trim($elementArray[0])] = isset($subPairs[$subPairIndex])? $this->structToObject('{'.$subPairs[$subPairIndex].'}'): 'NULL';
+						if($isOpt)
+						{
+							$structure[trim($elementArray[0])][self::OPT_KEY] = true;
+						}
 						$subPairIndex++;
 					}
 					else
 					{
-						$result = $this->isValidType($elementArray[1]);
+						$result = $this->isValidType($segment);
 						if($result['is_validated'])
 						{
 							$structure[trim($elementArray[0])] = $result[self::TYPE_KEY];
 						}
 						else
 						{
-							throw new \RuntimeException('Invalid Data Type:'.$elementArray[1]);
+							throw new \RuntimeException('Invalid Data Type:'.$segment);
 						}
 					}
 				}
@@ -446,7 +458,7 @@ class TypeStruct
 					/**
 					 * If element is not optional
 					 */
-					if(!isset($info['__opt']))
+					if(!isset($info[self::OPT_KEY]))
 					{
 						if(is_array($info) || ($info != 'any' && strtolower($info) != 'null'))
 						{
@@ -611,7 +623,7 @@ class TypeStruct
 		}
 		if($isQues)
 		{
-			$result[self::TYPE_KEY]['__opt'] = true;
+			$result[self::TYPE_KEY][self::OPT_KEY] = true;
 		}
 		if(!empty($rules))
 		{
@@ -767,7 +779,7 @@ class TypeStruct
 		}
 		else
 		{
-			if(!isset($info['__opt']) && empty($value))
+			if(!isset($info[self::OPT_KEY]) && empty($value))
 			{
 				$result['is_validated'] = false;
 				$result['message'] =  $this->getMessage('', '', 'missing');
@@ -920,6 +932,7 @@ class TypeStruct
 					$result['is_validated'] = false;
 					$result['message'] = $childResult['messages'];
 				}
+				
 				break;
 		}
 

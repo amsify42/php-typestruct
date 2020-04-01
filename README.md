@@ -13,6 +13,7 @@ $ composer require amsify42/php-typestruct
 4. [Class Validation](#4-class-validation)
 5. [Rules](#5-rules)
 6. [Custom Rules](#6-custom-rules)
+7. [Complex Example](#7-complex-example)
 
 
 ### 1. Introduction
@@ -152,13 +153,13 @@ We can do the validation by creating class and extending it to the `Amsify42\Typ
 ```php
 <?php
 
-namespace Amsify42\Validators;
+namespace App\Validators;
 
 use Amsify42\TypeStruct\Validator;
 
 class Sample extends Validator
 {
-    protected $tsClass = \Amsify42\TypeStruct\Simple::class;
+    protected $tsClass = \App\TypeStruct\Simple::class;
 
     protected $data = [
                         'id'    => 42,
@@ -193,6 +194,7 @@ protected $isDataObject;
 ```
 
 ### 5. Rules
+#### Basic
 These are the basic types we can use for elements.
 ```php
 export typestruct Sample {
@@ -203,16 +205,39 @@ export typestruct Sample {
     items: array
 }
 ```
+#### Optional
+To make the element optional, we simple prefix it with question mark **?**
+```php
+export typestruct Sample {
+    id: int,
+    name: string,
+    email: ?string
+}
+```
+Optional can also be applied to child dictionary
+```php
+export typestruct Sample {
+    id: int,
+    name: string,
+    email: ?string,
+    details : ?{
+        address: string,
+        pincode: ?int
+    }
+}
+```
+#### Length
 We can also set the limits to the length of these types like this
 ```php
 export typestruct Sample {
     id: int(5),
     name: string(20),
-    price: float(5,2),
+    price: float(5.2),
     is_active: boolean,
     items: [5]
 }
 ```
+#### Array
 These are the array types we can use
 ```php
 items: int[] 
@@ -220,6 +245,7 @@ items: string[]
 items: float[]
 items: boolean[]
 ```
+#### External as Child
 We can also use the other external **TypeStruct** file as a element
 ```php
 namespace App\TypeStruct;
@@ -252,6 +278,7 @@ export typestruct Product {
     categories: Category[]
 }
 ```
+#### More Rules
 You can also attach more rules to the input like this
 ```php
 namespace App\TypeStruct;
@@ -291,13 +318,13 @@ Now we can write method `checkName` in our validator class like this
 ```php
 <?php
 
-namespace Amsify42\Validators;
+namespace App\Validators;
 
 use Amsify42\TypeStruct\Validator;
 
 class Sample extends Validator
 {
-    protected $tsClass = \Amsify42\TypeStruct\Simple::class;
+    protected $tsClass = \App\TypeStruct\Simple::class;
 
     protected $data = [
                         'id'    => 42,
@@ -338,3 +365,99 @@ class Sample extends Validator
 } 
 ```
 **Note:** `$this->path` expects parameters to be key name separated by dot(if multiple keys) and will either return `NULL`(if key does not exist) or the target key value.
+
+### 7. Complex Example
+```php
+namespace App\TypeStruct;
+
+use App\TypeStruct\User;
+
+export typestruct Sample {
+    name: string,
+    email: string,
+    id: int,
+    address: {
+        door: string,
+        zip: int
+    },
+    items: [],
+    user : User,
+    someEl: {
+        key1: string,
+        key2: int,
+        key12: array,
+        records: \App\TypeStruct\Record[],
+        someChild: {
+            key3: boolean,
+            key4: float,
+            someAgainChild: {
+                key5: string,
+                key6: float,
+                key56: boolean[]
+            }
+        }
+    }
+}
+```
+```php
+<?php
+
+namespace App\TypeStruct;
+
+export typestruct User {
+    id: int,
+    name: string,
+    email: string<email>
+}
+```
+```php
+<?php
+
+namespace App\TypeStruct;
+
+export typestruct Record {
+    id: int,
+    name: string
+}
+```
+The above complex and multi level typestruct example file will be validated with the data:
+```php
+[
+    'name' => 'amsify',
+    'user' => [
+        'id' => 1,
+        'name' => 'some',
+        'email' => 'some@site.com'
+    ],
+    'address' => [
+        'door' => '12-3-534',
+        'zip' => 600035
+    ],
+    'url' => 'https://www.site.com/page.html',
+    'items' => [1,2,3,4,5,6,7],
+    'someEl' => [
+        'key1' => 'val1',
+        'key2' => 2,
+        'key12' => [1,2,12],
+        'records' => [
+            [
+                'id' => 1,
+                'name' => 'r1'
+            ],
+            [
+                'id' => 2,
+                'name' => 'r2'
+            ]
+        ],
+        'someChild' => [
+            'key3' => true,
+            'key4' => 4.01,
+            'someAgainChild' => [
+                'key5' => 'val5',
+                'key6' => 6.4,
+                'key56' => [true,false,true]
+            ]
+        ]
+    ]
+]
+```

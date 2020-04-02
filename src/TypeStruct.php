@@ -885,64 +885,81 @@ class TypeStruct
 	private function checkType($name, $value, $info)
 	{
 		$result = ['is_validated' => true, 'message' => ''];
-		$value  = Data::isStr($value)? trim($value): $value;
-		switch($info[self::TYPE_KEY])
+		if(Data::isStr($value))
 		{
-			case 'string':
-				if(!Data::isStr($value))
-				{
-					$result['is_validated'] = false;
-					$result['message'] = $this->getMessage('string');
-				}
-				break;
-
-			case 'int':
-				if(!Data::isInt($value))
-				{
-					$result['is_validated'] = false;
-					$result['message'] = $this->getMessage('integer');
-				}
-				break;
-
-			case 'float':
-				if(!Data::isFloat($value))
-				{
-					$result['is_validated'] = false;
-					$result['message'] = $this->getMessage('float');
-				}
-				break;
-			case 'boolean':
-				if(!Data::isBool($value))
-				{
-					$result['is_validated'] = false;
-					$result['message'] = $this->getMessage('boolean');
-				}
-				break;
-
-			case 'any':
-				break;	
-
-			default:
-				/**
-				 * If type is external typestruct
-				 */
-				$childResult = $this->newByFileName($info[self::TYPE_KEY])->validate($value);
-				if(!$childResult['is_validated'])
-				{
-					$result['is_validated'] = false;
-					$result['message'] = $childResult['messages'];
-				}
-				
-				break;
+			$value = trim($value);
 		}
-
-		if($result['is_validated'])
+		/**
+		 * Check if the value is empty
+		 */
+		if($value !== 0 && empty($value))
 		{
-			if(isset($info['length']) && $info['length'])
+			$result['is_validated'] = false;
+			$result['message'] = $this->getMessage('', '', 'missing');
+		}
+		/**
+		 * Else process of type checking
+		 */
+		else
+		{
+			switch($info[self::TYPE_KEY])
 			{
-				$result = $this->checkLength($name, $value, $info[self::TYPE_KEY], $info['length']);
+				case 'string':
+					if(!Data::isStr($value))
+					{
+						$result['is_validated'] = false;
+						$result['message'] = $this->getMessage('string');
+					}
+					break;
+
+				case 'int':
+					if(!Data::isInt($value))
+					{
+						$result['is_validated'] = false;
+						$result['message'] = $this->getMessage('integer');
+					}
+					break;
+
+				case 'float':
+					if(!Data::isFloat($value))
+					{
+						$result['is_validated'] = false;
+						$result['message'] = $this->getMessage('float');
+					}
+					break;
+				case 'boolean':
+					if(!Data::isBool($value))
+					{
+						$result['is_validated'] = false;
+						$result['message'] = $this->getMessage('boolean');
+					}
+					break;
+
+				case 'any':
+					break;	
+
+				default:
+					/**
+					 * If type is external typestruct
+					 */
+					$childResult = $this->newByFileName($info[self::TYPE_KEY])->validate($value);
+					if(!$childResult['is_validated'])
+					{
+						$result['is_validated'] = false;
+						$result['message'] = $childResult['messages'];
+					}
+					
+					break;
 			}
-			$result = $this->checkRules($name, $info, $result, $value);
+
+			if($result['is_validated'])
+			{
+				if(isset($info['length']) && $info['length'])
+				{
+					$result = $this->checkLength($name, $value, $info[self::TYPE_KEY], $info['length']);
+				}
+				$result = $this->checkRules($name, $info, $result, $value);
+			}
 		}
 
 		return $result;

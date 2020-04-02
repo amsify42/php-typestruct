@@ -195,7 +195,7 @@ protected $isDataObject;
 
 ### 5. Rules
 #### Basic
-These are the basic types we can use for elements.
+These are the basic types we can use for elements. It will check for both type and empty value.
 ```php
 export typestruct Sample {
     id: int,

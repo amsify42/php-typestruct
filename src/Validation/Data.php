@@ -50,11 +50,15 @@ class Data
 
 	public static function fromXML($xmlStr)
 	{
-		return self::fromArray(simplexml_load_string($xmlStr));
+		return self::fromArray(simplexml_load_string($xmlStr), true);
 	}
 
-	public static function fromArray($source)
+	public static function fromArray($source, $numCheck=false)
 	{
-		return json_decode(json_encode($source, JSON_NUMERIC_CHECK));
+		if($numCheck)
+		{
+			return json_decode(json_encode($source, JSON_NUMERIC_CHECK));	
+		}
+		return json_decode(json_encode($source));
 	}
 }

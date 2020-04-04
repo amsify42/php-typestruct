@@ -203,8 +203,10 @@ export typestruct Sample {
     price: float,
     is_active: boolean,
     items: array
+    some: any
 }
 ```
+Type `any` means that element value could be of any type.
 #### Optional
 To make the element optional, we simple prefix it with question mark **?**
 ```php

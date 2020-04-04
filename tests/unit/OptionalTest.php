@@ -24,7 +24,7 @@ final class OptionalTest extends TestCase
     public function testWithOptional()
     {
         $this->arrData['detail'] = [
-            'id' => '42',
+            'id' => 42,
         ];
         $typeStruct = new TypeStruct();
         $typeStruct->setClass($this->tsClass);
@@ -36,7 +36,7 @@ final class OptionalTest extends TestCase
     public function testWithOptional2()
     {
         $this->arrData['detail'] = [
-            'id' => '42',
+            'id' => 42,
             'name' => 12
         ];
         $typeStruct = new TypeStruct();

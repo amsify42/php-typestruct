@@ -1045,10 +1045,16 @@ class TypeStruct
 	 */
 	private function getFilePath($className)
 	{
-		$path = 'vendor/autoload.php';
-		if(is_file('../../vendor/autoload.php'))
+		$path = '../../vendor/autoload.php';
+		/**
+		 * Check if the script is running from app scope
+		 */
+		if(!is_file($path))
 		{
-			$path = '../../vendor/autoload.php';
+			/**
+			 * Else assign dev autoload scope script path
+			 */
+			$path = 'vendor/autoload.php';
 		}
 		$loader 	= require $path;
 		$loggerPath = $loader->findFile($className);

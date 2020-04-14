@@ -894,8 +894,14 @@ class TypeStruct
 		 */
 		if($value !== 0 && empty($value))
 		{
-			$result['is_validated'] = false;
-			$result['message'] = $this->getMessage('', '', 'missing');
+			/**
+			 * Skip if it is optional
+			 */
+			if(!isset($info[self::OPT_KEY]) || !$info[self::OPT_KEY])
+			{
+				$result['is_validated'] = false;
+				$result['message'] = $this->getMessage('', '', 'missing');
+			}
 		}
 		/**
 		 * Else process of type checking
@@ -1039,7 +1045,12 @@ class TypeStruct
 	 */
 	private function getFilePath($className)
 	{
-		$loader 	= require 'vendor/autoload.php';
+		$path = 'vendor/autoload.php';
+		if(is_file('../../vendor/autoload.php'))
+		{
+			$path = '../../vendor/autoload.php';
+		}
+		$loader 	= require $path;
 		$loggerPath = $loader->findFile($className);
 		if($loggerPath)
 		{

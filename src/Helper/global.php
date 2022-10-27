@@ -1,5 +1,10 @@
 <?php
 
+if(!defined('DS'))
+{
+    define('DS', DIRECTORY_SEPARATOR);
+}
+
 /**
  * Get new \Amsify42\TypeStruct\TypeStruct instance
  * @param  string  $source

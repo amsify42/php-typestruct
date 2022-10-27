@@ -1045,7 +1045,7 @@ class TypeStruct
 	 */
 	private function getFilePath($className)
 	{
-		$path = '../../vendor/autoload.php';
+		$path = __DIR__.'/../../../../vendor/autoload.php';
 		/**
 		 * Check if the script is running from app scope
 		 */

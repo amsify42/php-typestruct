@@ -202,12 +202,12 @@ export typestruct Sample {
     name: string,
     price: float,
     is_active: boolean,
-    is_public: tinyInt, // 0 or 1
+    is_public: tinyInt,
     items: array
     some: any
 }
 ```
-Type `any` means that element value could be of any type.
+`tinyInt` expects the value to be either `0` or `1` and type `any` means that element value could be of any type.
 #### Optional
 To make the element optional, we simple prefix it with question mark **?**
 ```php
@@ -428,6 +428,7 @@ The above complex and multi level typestruct example file will be validated with
 ```php
 [
     'name' => 'amsify',
+    'is_test' => '1',
     'user' => [
         'id' => 1,
         'name' => 'some',

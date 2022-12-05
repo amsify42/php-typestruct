@@ -11,6 +11,7 @@ class Complicated extends Validator
 	protected $data = [
                         'uid'     => 42,
                         'title'   => 'amsify42',
+                        'is_test' => '1',
                         'simples' => [
                             [
                                 'id'    => 41,

@@ -28,6 +28,11 @@ class Data
 		return is_bool($val);
 	}
 
+	public static function isTinyInt($val)
+	{
+		return ($val == '0' || $val == '1')? true: false;
+	}
+
 	public static function fromJson($jsonStr)
 	{
 		return json_decode($jsonStr);

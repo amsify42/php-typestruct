@@ -53,7 +53,7 @@ class TypeStruct
 	 * Reserved types
 	 * @var array
 	 */
-	private $reservedTypes = ['string', 'int', 'float', 'boolean', 'any'];
+	private $reservedTypes = ['string', 'int', 'float', 'boolean', 'tinyInt', 'any'];
 	/**
 	 * Reserved arrau types
 	 * @var array
@@ -779,94 +779,86 @@ class TypeStruct
 		}
 		else
 		{
-			if(!isset($info[self::OPT_KEY]) && empty($value))
+			if(isset($info['length']) && $info['length'])
 			{
-				$result['is_validated'] = false;
-				$result['message'] =  $this->getMessage('', '', 'missing');
+				if(($isArray && sizeof($value) > $info['length']))
+				{
+					$result['child_err'] = true;
+					$result['is_validated'] = false;
+					$result['message'] = $this->getMessage('', $info['length'], 'length');
+					return $result;
+				}
 			}
-			else
+			if(isset($info['of']) && $isArray)
 			{
-				if(isset($info['length']) && $info['length'])
+				if($info['of'] == 'string')
 				{
-					if(($isArray && sizeof($value) > $info['length']))
+					foreach($value as $vk => $el)
 					{
-						$result['child_err'] = true;
-						$result['is_validated'] = false;
-						$result['message'] = $this->getMessage('', $info['length'], 'length');
-						return $result;
-					}
-				}
-				if(isset($info['of']) && $isArray)
-				{
-					if($info['of'] == 'string')
-					{
-						foreach($value as $vk => $el)
+						if(!Data::isStr($el))
 						{
-							if(!Data::isStr($el))
-							{
-								$result['child_err'] = true;
-								$result['is_validated'] = false;
-								$result['message'] 	= $this->getMessage('array', 'string');
-								break;
-							}
-						}
-					}
-					else if($info['of'] == 'int')
-					{
-						foreach($value as $vk => $el)
-						{
-							if(!Data::isInt($el))
-							{
-								$result['child_err'] = true;
-								$result['is_validated'] = false;
-								$result['message'] 	= $this->getMessage('array', 'integer');
-								break;
-							}
-						}
-					}
-					else if($info['of'] == 'float')
-					{
-						foreach($value as $vk => $el)
-						{
-							if(!Data::isFloat($el))
-							{
-								$result['child_err'] = true;
-								$result['is_validated'] = false;
-								$result['message'] 	= $this->getMessage('array', 'float');
-								break;
-							}
-						}
-					}
-					else if($info['of'] == 'boolean')
-					{
-						foreach($value as $vk => $el)
-						{
-							if(!Data::isBool($el))
-							{
-								$result['child_err'] = true;
-								$result['is_validated'] = false;
-								$result['message'] 	= $this->getMessage('array', 'boolean');
-								break;
-							}
-						}
-					}
-					else
-					{
-						$typeStruct = $this->newByFileName($info['of']);
-						foreach($value as $vk => $val)
-						{
-							$childResult = $typeStruct->validate($val);
-							if(!$childResult['is_validated'])
-							{
-								$result['child_err'] = true;
-								$result['is_validated'] = false;
-								$result['message'] = $childResult['messages'];
-								break;
-							}
+							$result['child_err'] = true;
+							$result['is_validated'] = false;
+							$result['message'] 	= $this->getMessage('array', 'string');
+							break;
 						}
 					}
 				}
-			}	
+				else if($info['of'] == 'int')
+				{
+					foreach($value as $vk => $el)
+					{
+						if(!Data::isInt($el))
+						{
+							$result['child_err'] = true;
+							$result['is_validated'] = false;
+							$result['message'] 	= $this->getMessage('array', 'integer');
+							break;
+						}
+					}
+				}
+				else if($info['of'] == 'float')
+				{
+					foreach($value as $vk => $el)
+					{
+						if(!Data::isFloat($el))
+						{
+							$result['child_err'] = true;
+							$result['is_validated'] = false;
+							$result['message'] 	= $this->getMessage('array', 'float');
+							break;
+						}
+					}
+				}
+				else if($info['of'] == 'boolean')
+				{
+					foreach($value as $vk => $el)
+					{
+						if(!Data::isBool($el))
+						{
+							$result['child_err'] = true;
+							$result['is_validated'] = false;
+							$result['message'] 	= $this->getMessage('array', 'boolean');
+							break;
+						}
+					}
+				}
+				else
+				{
+					$typeStruct = $this->newByFileName($info['of']);
+					foreach($value as $vk => $val)
+					{
+						$childResult = $typeStruct->validate($val);
+						if(!$childResult['is_validated'])
+						{
+							$result['child_err'] = true;
+							$result['is_validated'] = false;
+							$result['message'] = $childResult['messages'];
+							break;
+						}
+					}
+				}
+			}
 		}
 		if($result['is_validated'])
 		{
@@ -885,87 +877,71 @@ class TypeStruct
 	private function checkType($name, $value, $info)
 	{
 		$result = ['is_validated' => true, 'message' => ''];
-		if(Data::isStr($value))
+
+		switch($info[self::TYPE_KEY])
 		{
-			$value = trim($value);
-		}
-		/**
-		 * Check if the value is empty
-		 */
-		if($value !== 0 && empty($value))
-		{
-			/**
-			 * Skip if it is optional
-			 */
-			if(!isset($info[self::OPT_KEY]) || !$info[self::OPT_KEY])
-			{
-				$result['is_validated'] = false;
-				$result['message'] = $this->getMessage('', '', 'missing');
-			}
-		}
-		/**
-		 * Else process of type checking
-		 */
-		else
-		{
-			switch($info[self::TYPE_KEY])
-			{
-				case 'string':
-					if(!Data::isStr($value))
-					{
-						$result['is_validated'] = false;
-						$result['message'] = $this->getMessage('string');
-					}
-					break;
-
-				case 'int':
-					if(!Data::isInt($value))
-					{
-						$result['is_validated'] = false;
-						$result['message'] = $this->getMessage('integer');
-					}
-					break;
-
-				case 'float':
-					if(!Data::isFloat($value))
-					{
-						$result['is_validated'] = false;
-						$result['message'] = $this->getMessage('float');
-					}
-					break;
-				case 'boolean':
-					if(!Data::isBool($value))
-					{
-						$result['is_validated'] = false;
-						$result['message'] = $this->getMessage('boolean');
-					}
-					break;
-
-				case 'any':
-					break;	
-
-				default:
-					/**
-					 * If type is external typestruct
-					 */
-					$childResult = $this->newByFileName($info[self::TYPE_KEY])->validate($value);
-					if(!$childResult['is_validated'])
-					{
-						$result['is_validated'] = false;
-						$result['message'] = $childResult['messages'];
-					}
-					
-					break;
-			}
-
-			if($result['is_validated'])
-			{
-				if(isset($info['length']) && $info['length'])
+			case 'string':
+				if(!Data::isStr($value))
 				{
-					$result = $this->checkLength($name, $value, $info[self::TYPE_KEY], $info['length']);
+					$result['is_validated'] = false;
+					$result['message'] = $this->getMessage('string');
 				}
-				$result = $this->checkRules($name, $info, $result, $value);
+				break;
+
+			case 'int':
+				if(!Data::isInt($value))
+				{
+					$result['is_validated'] = false;
+					$result['message'] = $this->getMessage('integer');
+				}
+				break;
+
+			case 'float':
+				if(!Data::isFloat($value))
+				{
+					$result['is_validated'] = false;
+					$result['message'] = $this->getMessage('float');
+				}
+				break;
+			case 'boolean':
+				if(!Data::isBool($value))
+				{
+					$result['is_validated'] = false;
+					$result['message'] = $this->getMessage('boolean');
+				}
+				break;
+			case 'tinyInt':
+				if(!Data::isTinyInt($value))
+				{
+					$result['is_validated'] = false;
+					$result['message'] = $this->getMessage('tiny integer');
+				}
+				break;	
+
+			case 'any':
+				break;	
+
+			default:
+				/**
+				 * If type is external typestruct
+				 */
+				$childResult = $this->newByFileName($info[self::TYPE_KEY])->validate($value);
+				if(!$childResult['is_validated'])
+				{
+					$result['is_validated'] = false;
+					$result['message'] = $childResult['messages'];
+				}
+				
+				break;
+		}
+
+		if($result['is_validated'])
+		{
+			if(isset($info['length']) && $info['length'])
+			{
+				$result = $this->checkLength($name, $value, $info[self::TYPE_KEY], $info['length']);
 			}
+			$result = $this->checkRules($name, $info, $result, $value);
 		}
 
 		return $result;

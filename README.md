@@ -184,7 +184,7 @@ protected $tsPath;
  */
 protected $validateFull;
 /**
- * You can json or xml, default is empty string
+ * You can set to json or xml, default is empty string
  */
 protected $contentType;
 /**
@@ -195,13 +195,14 @@ protected $isDataObject;
 
 ### 5. Rules
 #### Basic
-These are the basic types we can use for elements. It will check for both type and empty value.
+These are the basic types we can use for elements. It will check whether key exisy and its type.
 ```php
 export typestruct Sample {
     id: int,
     name: string,
     price: float,
     is_active: boolean,
+    is_public: tinyInt, // 0 or 1
     items: array
     some: any
 }
@@ -377,6 +378,7 @@ use App\TypeStruct\User;
 export typestruct Sample {
     name: string,
     email: string,
+    is_test: tinyInt,
     id: int,
     address: {
         door: string,

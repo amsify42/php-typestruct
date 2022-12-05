@@ -195,7 +195,7 @@ protected $isDataObject;
 
 ### 5. Rules
 #### Basic
-These are the basic types we can use for elements. It will check whether key exisy and its type.
+These are the basic types we can use for elements. It will check whether key exist and its type.
 ```php
 export typestruct Sample {
     id: int,
@@ -301,6 +301,7 @@ export typestruct User {
 ```
 These are the pre defined rules you can use
 ```txt
+nonEmpty - Check for non empty value just like php method empty() checks
 email - Check for valid email
 url - Check if string is a valid url
 date - Check if string is a valid date

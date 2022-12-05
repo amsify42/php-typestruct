@@ -96,6 +96,15 @@ class Rules
     /**
      * Default rules
      */
+    public function nonEmpty()
+    {
+        $value = Data::isStr($this->value)? trim($this->value): $this->value;
+        if(empty($value))
+        {
+            return 'Cannot be empty';
+        }
+        return true;
+    }
 
 	public function email()
     {

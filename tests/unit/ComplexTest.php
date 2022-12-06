@@ -21,7 +21,7 @@ final class ComplexTest extends TestCase
                                 'price' => 4
                             ],
                             [
-                                'id'    => 41,
+                                'id'    => '41',
                                 'name'  => 'amsify1',
                                 'email' => 'amsify1@site.com',
                                 'price' => 4.1
@@ -64,7 +64,7 @@ final class ComplexTest extends TestCase
     private function getStdClass()
     {
         $data          = new \stdClass();
-        $data->uid     = 42;
+        $data->uid     = '42';
         $data->title   = 'amsify';
         $data->price   = '42';
         $data->is_test = '1';
@@ -81,7 +81,7 @@ final class ComplexTest extends TestCase
         $data->simples[] = $item;
 
         $item        = new \stdClass();
-        $item->id    = 43;
+        $item->id    = '43';
         $item->price   = '42.1';
         $item->name  = 'amsify3';
         $item->is_test = '1';

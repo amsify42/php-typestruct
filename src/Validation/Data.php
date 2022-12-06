@@ -6,7 +6,7 @@ class Data
 {
 	public static function isInt($val)
 	{
-		return is_int($val);
+		return (is_int($val) || ctype_digit($val));
 	}
 
 	public static function isStr($val)

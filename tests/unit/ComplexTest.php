@@ -11,6 +11,7 @@ final class ComplexTest extends TestCase
     private $arrData = [
                         'uid'     => 42,
                         'title'   => 'amsify42',
+                        'price'   => '42',
                         'is_test' => '1',
                         'simples' => [
                             [
@@ -65,13 +66,15 @@ final class ComplexTest extends TestCase
         $data          = new \stdClass();
         $data->uid     = 42;
         $data->title   = 'amsify';
+        $data->price   = '42';
         $data->is_test = '1';
         $data->email   = 'amsify@site.com';
         $data->simples = [];
 
         $item        = new \stdClass();
         $item->id    = 41;
-        $item->name  = 'amsify1';
+        $item->name    = 'amsify1';
+        $item->price   = 42;
         $item->is_test = '0';
         $item->email = 'amsify1@site.com';
         $item->price = 4.1;
@@ -79,6 +82,7 @@ final class ComplexTest extends TestCase
 
         $item        = new \stdClass();
         $item->id    = 43;
+        $item->price   = '42.1';
         $item->name  = 'amsify3';
         $item->is_test = '1';
         $item->email = 'amsify3@site.com';

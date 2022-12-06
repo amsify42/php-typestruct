@@ -32,10 +32,20 @@ class Rules
      */
     private $arraySimple  = NULL;
     /**
+     * It sets the active data element name applicable for rules
+     * @var null
+     */
+    private $name = NULL;
+    /**
      * It sets the active data element value applicable for rules
      * @var null
      */
     private $value = NULL;
+
+    protected function name()
+    {
+        return $this->name;
+    }
 
     protected function value()
     {
@@ -66,6 +76,11 @@ class Rules
                 $this->arraySimple = new ArraySimple([]);   
             }
         }
+    }
+
+    public function setName($name)
+    {
+        $this->name = $name;
     }
 
     public function setValue($value)

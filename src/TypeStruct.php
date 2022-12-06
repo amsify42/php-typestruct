@@ -53,12 +53,12 @@ class TypeStruct
 	 * Reserved types
 	 * @var array
 	 */
-	private $reservedTypes = ['string', 'int', 'float', 'boolean', 'tinyInt', 'any'];
+	private $reservedTypes = ['string', 'int', 'float', 'numeric', 'boolean', 'tinyInt', 'any'];
 	/**
 	 * Reserved arrau types
 	 * @var array
 	 */
-	private $arrayTypes = ['array', '[]', 'string', 'int', 'float', 'boolean'];
+	private $arrayTypes = ['array', '[]', 'string', 'int', 'float', 'numeric', 'boolean', 'tinyInt'];
 	/**
 	 * structure
 	 * @var array
@@ -830,6 +830,19 @@ class TypeStruct
 						}
 					}
 				}
+				else if($info['of'] == 'numeric')
+				{
+					foreach($value as $vk => $el)
+					{
+						if(!Data::isNumeric($el))
+						{
+							$result['child_err'] = true;
+							$result['is_validated'] = false;
+							$result['message'] 	= $this->getMessage('array', 'numeric');
+							break;
+						}
+					}
+				}
 				else if($info['of'] == 'boolean')
 				{
 					foreach($value as $vk => $el)
@@ -839,6 +852,19 @@ class TypeStruct
 							$result['child_err'] = true;
 							$result['is_validated'] = false;
 							$result['message'] 	= $this->getMessage('array', 'boolean');
+							break;
+						}
+					}
+				}
+				else if($info['of'] == 'tinyInt')
+				{
+					foreach($value as $vk => $el)
+					{
+						if(!Data::isTinyInt($el))
+						{
+							$result['child_err'] = true;
+							$result['is_validated'] = false;
+							$result['message'] 	= $this->getMessage('array', 'tiny integer');
 							break;
 						}
 					}
@@ -887,7 +913,6 @@ class TypeStruct
 					$result['message'] = $this->getMessage('string');
 				}
 				break;
-
 			case 'int':
 				if(!Data::isInt($value))
 				{
@@ -895,7 +920,6 @@ class TypeStruct
 					$result['message'] = $this->getMessage('integer');
 				}
 				break;
-
 			case 'float':
 				if(!Data::isFloat($value))
 				{
@@ -903,6 +927,13 @@ class TypeStruct
 					$result['message'] = $this->getMessage('float');
 				}
 				break;
+			case 'numeric':
+				if(!Data::isNumeric($value))
+				{
+					$result['is_validated'] = false;
+					$result['message'] = $this->getMessage('numeric');
+				}
+				break;	
 			case 'boolean':
 				if(!Data::isBool($value))
 				{
@@ -916,8 +947,7 @@ class TypeStruct
 					$result['is_validated'] = false;
 					$result['message'] = $this->getMessage('tiny integer');
 				}
-				break;	
-
+				break;
 			case 'any':
 				break;	
 
@@ -975,6 +1005,7 @@ class TypeStruct
 				{
 					if(method_exists(self::$validator, $method) && is_callable([self::$validator, $method]))
 					{
+						self::$validator->setName($name);
 						self::$validator->setValue($value);
 						$cResult = call_user_func_array([self::$validator, $method], []);
 						if($cResult !== true)

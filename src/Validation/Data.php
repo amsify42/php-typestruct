@@ -33,6 +33,11 @@ class Data
 		return ($val == '0' || $val == '1')? true: false;
 	}
 
+	public static function isNumeric($val)
+	{
+		return is_numeric($val);
+	}
+
 	public static function fromJson($jsonStr)
 	{
 		return json_decode($jsonStr);

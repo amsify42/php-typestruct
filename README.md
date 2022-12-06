@@ -173,6 +173,12 @@ Since we already set `TypeStruct` class name and `data` in **protected** propert
 $sample = new \Amsify42\Validators\Sample();
 $result = $sample->validate();
 ```
+You can also set the data before validating against the typestruct like this
+```php
+$sample = new \Amsify42\Validators\Sample();
+$sample->setData(['id' => 42, 'name' => 'amsify']);
+$result = $sample->validate();
+```
 and we can also use these protected properties which extends `Amsify42\TypeStruct\Validator`
 ```php
 /**
@@ -201,15 +207,16 @@ export typestruct Sample {
     id: int,
     name: string,
     price: float,
+    points: numeric,
     is_active: boolean,
     is_public: tinyInt,
     items: array
     some: any
 }
 ```
-`tinyInt` expects the value to be either `0` or `1` and type `any` means that element value could be of any type.
+`numeric` work just like php `is_numeric()` method which allows numbers even in quotes. `tinyInt` expects the value to be either `0` or `1` and type `any` means that element value could be of any type.
 #### Optional
-To make the element optional, we simple prefix it with question mark **?**
+To make the element optional, we simply prefix it with question mark **?**
 ```php
 export typestruct Sample {
     id: int,
@@ -246,7 +253,9 @@ These are the array types we can use
 items: int[] 
 items: string[]
 items: float[]
+items: numeric[]
 items: boolean[]
+items: tinyInt[]
 ```
 #### External as Child
 We can also use the other external **TypeStruct** file as a element
@@ -325,10 +334,11 @@ Now we can write method `checkName` in our validator class like this
 namespace App\Validators;
 
 use Amsify42\TypeStruct\Validator;
+use App\TypeStruct\Simple;
 
 class Sample extends Validator
 {
-    protected $tsClass = \App\TypeStruct\Simple::class;
+    protected $tsClass = Simple::class;
 
     protected $data = [
                         'id'    => 42,
@@ -346,7 +356,7 @@ class Sample extends Validator
     }                                 
 }
 ```
-We can use `$this->value()` to get the active value of the element which is applicable to the rule. To get the other element value, we already have `$this->data` accessible from these custom rule methods.
+We can use `$this->name()` to get the name of current element and  `$this->value()` to get the value of the current element which is applicable to the rule. To get the other element value, we already have `$this->data` accessible from these custom rule methods.
 <br/>
 If you want to access data from custom method more easily, you can also use the method `$this->path()` which will directly get the element from multi level path.
 ```php

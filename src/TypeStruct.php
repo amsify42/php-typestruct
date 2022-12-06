@@ -453,7 +453,7 @@ class TypeStruct
 				/**
 				 * If element not found
 				 */
-				if(!isset($data->{$name}))
+				if(!$data || !property_exists($data, $name))
 				{
 					/**
 					 * If element is not optional
